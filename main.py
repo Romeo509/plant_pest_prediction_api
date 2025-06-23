@@ -74,17 +74,17 @@ async def describe_plant_disease(media: List[UploadFile] = File(...)):
     Upload media to identify plant diseases, causes, and control measures.
     """
     query = (
-    "Analyze the uploaded image or video of a plant. Start by identifying the plant type (e.g., maize, tomato, cassava).\n\n"
-    "If the plant is maize, specifically check for Common Rust, Gray Leaf Spot, Blight, or if the plant is Healthy.\n"
-    "If the plant is not maize, identify any visible disease and its cause if present.\n\n"
-    "If the plant is healthy, clearly state that its status is 'Healthy'.\n"
-    "For any disease found, name the disease and explain what causes it.\n"
-    "Then, on a new line, provide clear measures to control or treat the condition.\n\n"
-    "Structure the response as follows:\n"
+    "Look at the uploaded plant image or video and start by identifying the plant type (e.g., maize, tomato, cassava).\n\n"
+    "If the plant is maize (corn), check if it is affected by Common Rust, Gray Leaf Spot, Blight, or if it is Healthy.\n"
+    "If the plant is not maize, analyze it for any visible disease and its cause.\n\n"
+    "If the plant is healthy, clearly state 'Healthy' as its disease status.\n"
+    "If a disease is found, provide its name, what causes it, and measures to control or treat it.\n\n"
+    "Respond using the following format:\n"
     "1. Plant type:\n"
     "2. Disease status:\n"
     "3. Control or treatment:"
 )
+
 
     asset_ids, media_tags, file_paths = [], [], []
 
