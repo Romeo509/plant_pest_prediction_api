@@ -18,7 +18,7 @@ app = FastAPI(
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 templates = Jinja2Templates(directory="templates")
 
-API_KEY = os.getenv("NVIDIA_API_KEY")
+API_KEY = os.getenv("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")
 UPLOAD_FOLDER = "uploads"
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 
