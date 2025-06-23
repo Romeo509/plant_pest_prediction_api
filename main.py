@@ -125,3 +125,9 @@ async def describe_plant_disease(media: List[UploadFile] = File(...)):
 @app.get("/", response_class=HTMLResponse)
 def demo_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+# ✅ REQUIRED for Render deployment to bind to 0.0.0.0:$PORT
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
