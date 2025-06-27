@@ -74,21 +74,22 @@ async def describe_plant_disease(media: List[UploadFile] = File(...)):
     Upload media to identify plant diseases, causes, and control measures.
     """
     query = (
-    "You are analyzing an uploaded image or video of a corn (maize) plant.\n\n"
-    "Only check for the following known corn issues in Ghana:\n"
+    "You are analyzing an uploaded image or video of a corn (maize) plant in Ghana.\n\n"
+    "Only check for the following known corn issues:\n"
     "- Maize Streak Virus (disease)\n"
     "- Northern Corn Leaf Blight (disease)\n"
     "- Common Rust (disease)\n"
     "- Fall Armyworm (pest)\n"
     "- Stem Borers (pest)\n"
     "- Maize Weevils (post-harvest pest)\n\n"
-    "If none of these are present, clearly state that the plant is 'Healthy'.\n\n"
-    "For any identified issue, provide:\n"
-    "- Name of the disease or pest\n"
-    "- Type (Disease, Pest, or Post-harvest)\n"
-    "- Main impact on the plant\n"
-    "- Recommended control or treatment measures\n\n"
-    "Respond using this format:\n"
+    "Do NOT mention vague terms like 'caterpillar' or 'worm' — if you identify a pest, use the correct name such as 'Fall Armyworm' or 'Stem Borer'.\n\n"
+    "When suggesting control or treatment, only give practical solutions used in Ghanaian farming contexts. DO NOT recommend introducing foreign species like ladybugs or lacewings.\n"
+    "Preferred control methods should include:\n"
+    "- Recommended local pesticides (like emamectin benzoate or neem-based solutions)\n"
+    "- Cultural practices (e.g., early planting, handpicking, crop rotation)\n"
+    "- Integrated Pest Management (IPM) where applicable\n\n"
+    "If the plant is healthy, clearly state: 'Healthy'.\n\n"
+    "Format your response like this:\n"
     "1. Plant type: Maize (corn)\n"
     "2. Disease or pest status:\n"
     "   - Name:\n"
@@ -96,6 +97,7 @@ async def describe_plant_disease(media: List[UploadFile] = File(...)):
     "   - Main impact:\n"
     "   - Control or treatment:"
 )
+
 
 
 
