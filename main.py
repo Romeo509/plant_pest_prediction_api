@@ -74,16 +74,29 @@ async def describe_plant_disease(media: List[UploadFile] = File(...)):
     Upload media to identify plant diseases, causes, and control measures.
     """
     query = (
-    "Look at the uploaded plant image or video and start by identifying the plant type (e.g., maize, tomato, cassava).\n\n"
-    "If the plant is maize (corn), check if it is affected by Common Rust, Gray Leaf Spot, Blight, or if it is Healthy.\n"
-    "If the plant is not maize, analyze it for any visible disease and its cause.\n\n"
-    "If the plant is healthy, clearly state 'Healthy' as its disease status.\n"
-    "If a disease is found, provide its name, what causes it, and measures to control or treat it.\n\n"
-    "Respond using the following format:\n"
-    "1. Plant type:\n"
-    "2. Disease status:\n"
-    "3. Control or treatment:"
+    "You are analyzing an uploaded image or video of a corn (maize) plant.\n\n"
+    "Only check for the following known corn issues in Ghana:\n"
+    "- Maize Streak Virus (disease)\n"
+    "- Northern Corn Leaf Blight (disease)\n"
+    "- Common Rust (disease)\n"
+    "- Fall Armyworm (pest)\n"
+    "- Stem Borers (pest)\n"
+    "- Maize Weevils (post-harvest pest)\n\n"
+    "If none of these are present, clearly state that the plant is 'Healthy'.\n\n"
+    "For any identified issue, provide:\n"
+    "- Name of the disease or pest\n"
+    "- Type (Disease, Pest, or Post-harvest)\n"
+    "- Main impact on the plant\n"
+    "- Recommended control or treatment measures\n\n"
+    "Respond using this format:\n"
+    "1. Plant type: Maize (corn)\n"
+    "2. Disease or pest status:\n"
+    "   - Name:\n"
+    "   - Type:\n"
+    "   - Main impact:\n"
+    "   - Control or treatment:"
 )
+
 
 
     asset_ids, media_tags, file_paths = [], [], []
