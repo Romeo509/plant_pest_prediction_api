@@ -68,7 +68,7 @@ body {
 .theme-label { color: var(--text-muted); font-size:0.9rem; align-self:center }
 .theme-select { padding:6px 8px; border-radius:8px; border:1px solid var(--panel-border); background: #fff }
 
-.kpis-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; padding: 8px 12px; max-width:1200px; margin: 8px auto 0 }
+.kpis-grid { display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; padding: 8px 12px; max-width:1200px; margin: 8px auto 0 }
 .kpi { background: var(--panel-bg); border:1px solid var(--panel-border); border-radius:10px; padding:10px 12px; box-shadow: 0 4px 14px rgba(16,24,40,0.05) }
 .kpi-label { font-size:0.75rem; color: var(--text-muted) }
 .kpi-value { font-size:1.15rem; font-weight:800; color: var(--text-primary); margin-top:4px }
@@ -97,7 +97,7 @@ body {
 /* charts span full width beneath the grid */
 .panel-charts { grid-column: 1 / 3; grid-row: 3 / 4; }
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap:12px; }
-.chart-card { flex:1; background: rgba(255,255,255,0.95); padding:12px; border-radius:10px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); border:1px solid rgba(34,34,34,0.04); min-height:220px; display:flex; flex-direction:column }
+.chart-card { flex:1; background: var(--panel-bg); padding:12px; border-radius:10px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); border:1px solid var(--panel-border); min-height:220px; display:flex; flex-direction:column }
 .chart-card h3 { margin-bottom:8px; font-size:0.95rem }
 /* ensure canvas keeps a consistent height and doesn't stretch the whole page */
 .chart-card canvas { width:100% !important; height:180px !important; max-height:240px; }
@@ -147,6 +147,12 @@ body {
 .logs-area .log-info { color: var(--logs-info) }
 .logs-area .log-error { color: var(--logs-error) }
 .logs-actions { margin-top:8px; display:flex; justify-content:flex-end }
+
+/* Toasts */
+.toast-container { position: fixed; right: 16px; bottom: 16px; display:flex; flex-direction:column; gap:8px; z-index: 1000 }
+.toast { background: var(--panel-bg); color: var(--text-primary); border:1px solid var(--panel-border); box-shadow: var(--panel-shadow); border-radius: 8px; padding: 10px 12px; min-width: 220px }
+.toast.success { border-left: 4px solid #16a34a }
+.toast.error { border-left: 4px solid #dc2626 }
 
 @media (max-width: 900px) {
   .grid-root { grid-template-columns: 1fr; grid-template-rows: auto auto auto auto }

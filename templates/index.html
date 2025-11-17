@@ -39,6 +39,14 @@
             <div class="kpi-label">Uptime</div>
             <div id="kpiUptime" class="kpi-value">00:00:00</div>
         </div>
+        <div class="kpi">
+            <div class="kpi-label">Success Rate</div>
+            <div id="kpiSuccess" class="kpi-value">—</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Error Rate</div>
+            <div id="kpiError" class="kpi-value">—</div>
+        </div>
     </section>
 
     <main class="grid-root">
@@ -107,7 +115,7 @@
             <h2>Charts</h2>
             <div class="charts-grid">
                 <div class="chart-card">
-                    <h3>Requests Over Time</h3>
+                    <h3>Requests per Minute</h3>
                     <canvas id="requestsChart" height="140"></canvas>
                 </div>
                 <div class="chart-card">
@@ -116,6 +124,9 @@
                 </div>
             </div>
         </section>
+
+        <!-- Toasts -->
+        <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
     </main>
     
     <!-- Chart.js for rendering request and disease charts -->

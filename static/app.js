@@ -23,11 +23,17 @@ const kpiRequests = document.getElementById('kpiRequests');
 const kpiLatency = document.getElementById('kpiLatency');
 const kpiModel = document.getElementById('kpiModel');
 const kpiUptime = document.getElementById('kpiUptime');
+const kpiSuccess = document.getElementById('kpiSuccess');
+const kpiError = document.getElementById('kpiError');
+const toastContainer = document.getElementById('toastContainer');
 
 let currentFile = null;
 let startTime = Date.now();
 let totalRequests = 0;
 let totalLatencyMs = 0;
+let successCount = 0;
+let errorCount = 0;
+const requestTimes = []; // timestamps (ms) of requests for requests/min
 
 // Drag & drop handlers
 ['dragenter','dragover'].forEach(evt => {
@@ -118,9 +124,15 @@ async function uploadImage() {
 
     if (!resp.ok) {
       const msg = data?.detail || `Server returned ${resp.status}`;
+      errorCount += 1;
+      updateKpis();
+      showToast(`Error: ${msg}`, 'error');
       throw new Error(msg);
     }
 
+    successCount += 1;
+    updateKpis();
+    showToast('Prediction complete', 'success');
     displayResults(data);
   } catch (err) {
     loading.style.display = 'none';
@@ -206,6 +218,10 @@ function updateKpis() {
   const avg = totalRequests ? (totalLatencyMs / totalRequests) : 0;
   if (kpiLatency) kpiLatency.textContent = totalRequests ? `${avg.toFixed(0)} ms` : '—';
   if (kpiModel && kpiModel.textContent.trim() === '') kpiModel.textContent = 'maize-disease-v1';
+  const succRate = totalRequests ? (successCount/totalRequests*100) : 0;
+  const errRate = totalRequests ? (errorCount/totalRequests*100) : 0;
+  if (kpiSuccess) kpiSuccess.textContent = totalRequests ? `${succRate.toFixed(0)}%` : '—';
+  if (kpiError) kpiError.textContent = totalRequests ? `${errRate.toFixed(0)}%` : '—';
 }
 function tickUptime() {
   const sec = Math.floor((Date.now() - startTime) / 1000);
@@ -222,6 +238,10 @@ const maxPoints = 20;
 let chartLabels = [];
 let cumulativeRequests = 0;
 const diseaseCounts = {}; // name -> cumulative count
+const diseaseColorMap = new Map();
+const diseasePalette = [
+  '#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#9333ea', '#06b6d4', '#f97316', '#84cc16', '#e11d48', '#0ea5e9'
+];
 
 function initCharts() {
   const reqCtx = document.getElementById('requestsChart').getContext('2d');
@@ -229,7 +249,7 @@ function initCharts() {
 
   requestsChart = new Chart(reqCtx, {
     type: 'line',
-    data: { labels: chartLabels, datasets: [{ label: 'Total Requests', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.3 }] },
+    data: { labels: chartLabels, datasets: [{ label: 'Requests/min', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.3 }] },
     options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: true }, y: { beginAtZero: true } } }
   });
 
@@ -246,10 +266,14 @@ function recordPrediction(disease) {
   chartLabels.push(timeLabel);
   if (chartLabels.length > maxPoints) chartLabels.shift();
 
-  // requests: cumulative
-  cumulativeRequests += 1;
+  // requests: per-minute rate
+  const nowMs = Date.now();
+  requestTimes.push(nowMs);
+  // drop older than 60s
+  while (requestTimes.length && (nowMs - requestTimes[0] > 60000)) requestTimes.shift();
+  const rpm = requestTimes.length; // approximate requests in last 60s
   const reqDataset = requestsChart.data.datasets[0].data;
-  reqDataset.push(cumulativeRequests);
+  reqDataset.push(rpm);
   if (reqDataset.length > maxPoints) reqDataset.shift();
   requestsChart.data.labels = chartLabels.slice();
 
@@ -257,8 +281,8 @@ function recordPrediction(disease) {
   if (!diseaseCounts[disease]) {
     diseaseCounts[disease] = 0;
     // create new dataset for this disease, initialize previous points to zero
-    const color = randomColor();
-    const newDs = { label: disease, data: Array(chartLabels.length-1).fill(0).concat([0]), borderColor: color, backgroundColor: color+'22', tension: 0.3 };
+    const color = getColorForDisease(disease);
+    const newDs = { label: disease, data: Array(chartLabels.length-1).fill(0).concat([0]), borderColor: color, backgroundColor: hexToRgba(color, 0.15), tension: 0.3 };
     diseasesChart.data.datasets.push(newDs);
   }
   diseaseCounts[disease] += 1;
@@ -286,11 +310,30 @@ function recordPrediction(disease) {
   diseasesChart.update();
 }
 
-function randomColor() {
-  const r = Math.floor(Math.random()*180)+50;
-  const g = Math.floor(Math.random()*180)+50;
-  const b = Math.floor(Math.random()*180)+50;
-  return `rgb(${r}, ${g}, ${b})`;
+function getColorForDisease(name) {
+  if (diseaseColorMap.has(name)) return diseaseColorMap.get(name);
+  const idx = diseaseColorMap.size % diseasePalette.length;
+  const color = diseasePalette[idx];
+  diseaseColorMap.set(name, color);
+  return color;
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#','');
+  const bigint = parseInt(h, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Toasts
+function showToast(message, type = 'success') {
+  if (!toastContainer) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  toastContainer.appendChild(el);
+  setTimeout(() => { el.remove(); }, 3200);
 }
 
 // Initialize charts when DOM is ready (canvas elements exist)
