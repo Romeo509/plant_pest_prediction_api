@@ -1,34 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Plant Disease Identifier</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    input, button { width: 100%; padding: 10px; margin-top: 10px; }
-    .output { margin-top: 20px; white-space: pre-wrap; background: #f4f4f4; padding: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriCom Pest Prediction Demo</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <h2>Plant Disease Identifier</h2>
-  <p>Upload a plant image or video. We'll identify the disease, its cause, and how to control it.</p>
-  <form id="form">
-    <input type="file" name="media" multiple required />
-    <button type="submit">Analyze</button>
-  </form>
-  <div class="output" id="result"></div>
+    <div class="container">
+        <h1>🌽 AgriCom Pest Prediction Demo</h1>
+        <p class="subtitle">Upload a maize leaf image to detect diseases</p>
+        
+        <div class="upload-section">
+            <input type="file" id="imageInput" accept="image/*">
+            <button onclick="uploadImage()">Predict Disease</button>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <p>🔄 Analyzing image...</p>
+        </div>
+        
+        <div id="results" class="results" style="display: none;">
+            <h2>Prediction Results</h2>
+            
+            <div class="result-section">
+                <h3>Detailed Output</h3>
+                <pre id="detailedOutput"></pre>
+            </div>
+            
+            <div class="result-section final-prediction">
+                <h3>Final Prediction</h3>
+                <p id="finalPrediction"></p>
+            </div>
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
 
-  <script>
-    const form = document.getElementById("form");
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const res = await fetch("/describe", {
-        method: "POST",
-        body: formData
-      });
-      const json = await res.json();
-      document.getElementById("result").innerText = JSON.stringify(json, null, 2);
-    };
-  </script>
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            // Reset previous results
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Prediction failed');
+                }
+                
+                displayResults(data);
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '❌ Error: ' + error.message;
+            }
+        }
+        
+        function displayResults(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Format detailed output
+            const detailedOutput = {
+                'disease': data.disease,
+                'confidence': data.confidence,
+                'all_probs': data.all_probs
+            };
+            
+            document.getElementById('detailedOutput').textContent = JSON.stringify(detailedOutput, null, 2);
+            
+            // Display final prediction
+            document.getElementById('finalPrediction').textContent = '🎯 Final Prediction: ' + data.final_prediction;
+        }
+    </script>
 </body>
 </html>
