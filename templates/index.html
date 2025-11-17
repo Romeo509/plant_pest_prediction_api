@@ -1,96 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriCom Pest Prediction Demo</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgriCom Pest Prediction — Dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <meta name="description" content="Upload leaf images and get disease predictions" />
 </head>
 <body>
-    <div class="container">
-        <h1>🌽 AgriCom Pest Prediction Demo</h1>
-        <p class="subtitle">Upload a maize leaf image to detect diseases</p>
-        
-        <div class="upload-section">
-            <input type="file" id="imageInput" accept="image/*">
-            <button onclick="uploadImage()">Predict Disease</button>
+    <header class="app-header">
+        <div class="brand">🌽 AgriCom</div>
+        <div class="subtitle">Pest & disease prediction dashboard</div>
+        <div class="toolbar">
+            <a class="btn-link" href="/docs" target="_blank" rel="noopener">API Docs</a>
+            <label class="theme-label" for="themeSelect">Theme</label>
+            <select id="themeSelect" class="theme-select" aria-label="Select theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="forest">Forest</option>
+            </select>
         </div>
-        
-        <div id="loading" class="loading" style="display: none;">
-            <p>🔄 Analyzing image...</p>
-        </div>
-        
-        <div id="results" class="results" style="display: none;">
-            <h2>Prediction Results</h2>
-            
-            <div class="result-section">
-                <h3>Detailed Output</h3>
-                <pre id="detailedOutput"></pre>
-            </div>
-            
-            <div class="result-section final-prediction">
-                <h3>Final Prediction</h3>
-                <p id="finalPrediction"></p>
-            </div>
-        </div>
-        
-        <div id="error" class="error" style="display: none;"></div>
-    </div>
+    </header>
 
-    <script>
-        async function uploadImage() {
-            const fileInput = document.getElementById('imageInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Please select an image file');
-                return;
-            }
-            
-            // Reset previous results
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch('/api/predict', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Prediction failed');
-                }
-                
-                displayResults(data);
-            } catch (error) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = '❌ Error: ' + error.message;
-            }
-        }
-        
-        function displayResults(data) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
-            
-            // Format detailed output
-            const detailedOutput = {
-                'disease': data.disease,
-                'confidence': data.confidence,
-                'all_probs': data.all_probs
-            };
-            
-            document.getElementById('detailedOutput').textContent = JSON.stringify(detailedOutput, null, 2);
-            
-            // Display final prediction
-            document.getElementById('finalPrediction').textContent = '🎯 Final Prediction: ' + data.final_prediction;
-        }
-    </script>
+    <section class="kpis-grid">
+        <div class="kpi">
+            <div class="kpi-label">Total Requests</div>
+            <div id="kpiRequests" class="kpi-value">0</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Avg Latency</div>
+            <div id="kpiLatency" class="kpi-value">—</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Model</div>
+            <div id="kpiModel" class="kpi-value">maize-disease-v1</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Uptime</div>
+            <div id="kpiUptime" class="kpi-value">00:00:00</div>
+        </div>
+    </section>
+
+    <main class="grid-root">
+        <!-- Uploader -->
+        <section class="panel panel-uploader" id="uploader">
+            <h2>Upload / Drag an image</h2>
+            <div id="dropZone" class="drop-zone">
+                <img id="previewImage" src="" alt="preview" style="display:none;" />
+                <div id="dropHint" class="drop-hint">Drop image here or <label for="imageInput" class="file-label">tap to choose</label></div>
+                <input type="file" id="imageInput" accept="image/*" style="display:none;">
+            </div>
+            <div class="uploader-actions">
+                <button id="predictBtn" class="btn-primary">Predict</button>
+                <button id="clearBtn" class="btn-ghost">Clear</button>
+            </div>
+        </section>
+
+        <!-- Analysis -->
+        <section class="panel panel-analysis" id="analysis">
+            <h2>Analysis</h2>
+            <div id="loading" class="loading" style="display:none">🔄 Analyzing image...</div>
+            <div id="results" class="results" style="display:none">
+                <div class="final-prediction">
+                    <div id="finalPrediction">—</div>
+                    <div id="confidenceLabel" class="confidence-label"></div>
+                </div>
+                <div class="result-details">
+                    <h3>Detailed Output</h3>
+                    <pre id="detailedOutput">{ }</pre>
+                </div>
+            </div>
+            <div id="error" class="error" style="display:none"></div>
+        </section>
+
+        <!-- AI Health -->
+        <aside class="panel panel-health" id="aiHealth">
+            <h2>AI Health</h2>
+            <div class="health-item">
+                <div class="health-label">Status</div>
+                <div id="healthStatus" class="health-value">Idle</div>
+            </div>
+            <div class="health-item">
+                <div class="health-label">Last Confidence</div>
+                <div class="confidence-meter">
+                    <div id="confidenceBar" class="confidence-bar" style="width:0%;"></div>
+                </div>
+                <div id="confidencePct" class="confidence-pct">0%</div>
+            </div>
+            <div class="health-item">
+                <div class="health-label">Model</div>
+                <div class="health-value">maize-disease-v1</div>
+            </div>
+        </aside>
+
+        <!-- Logs -->
+        <aside class="panel panel-logs" id="logs">
+            <h2>Logs</h2>
+            <div id="logsArea" class="logs-area" aria-live="polite" role="log"></div>
+            <div class="logs-actions">
+                <button id="clearLogs" class="btn-ghost">Clear Logs</button>
+            </div>
+        </aside>
+
+        <!-- Charts (span full width) -->
+        <section class="panel panel-charts" id="charts">
+            <h2>Charts</h2>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Requests Over Time</h3>
+                    <canvas id="requestsChart" height="140"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Diseases Detected Over Time</h3>
+                    <canvas id="diseasesChart" height="140"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Chart.js for rendering request and disease charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>

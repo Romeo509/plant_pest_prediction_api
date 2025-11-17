@@ -15,7 +15,7 @@ pip install -r requirements.txt
 Start the FastAPI web server:
 
 ```bash
-uvicorn app:app --reload
+python -m uvicorn app:app --reload
 ```
 
 Then open your browser and navigate to:
